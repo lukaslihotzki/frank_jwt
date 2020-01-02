@@ -209,7 +209,12 @@ fn sign_rsa<P: ToKey>(data: &str, private_key_path: &P, algorithm: Algorithm) ->
 
 #[cfg(ossl110)]
 fn order_bytes(g: &openssl::ec::EcGroupRef) -> i32 {
-    ((g.order_bits() + 7) / 8).try_into().unwrap()
+    fn int_div_round_up(a: u32, b: u32) -> u32 {
+        (a + (b - 1)) / b
+    }
+
+    const BIT_PER_BYTE: u32 = 8;
+    int_div_round_up(g.order_bits(), BIT_PER_BYTE).try_into().unwrap()
 }
 
 #[cfg(not(ossl110))]
